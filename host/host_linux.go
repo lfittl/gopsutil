@@ -44,6 +44,10 @@ func Info() (*InfoStat, error) {
 		ret.PlatformFamily = family
 		ret.PlatformVersion = version
 	}
+	kernelVersion, err := KernelVersion()
+	if err == nil {
+		ret.KernelVersion = kernelVersion
+	}
 
 	system, role, err := Virtualization()
 	if err == nil {
@@ -352,6 +356,20 @@ func PlatformInformation() (platform string, family string, version string, err 
 
 	return platform, family, version, nil
 
+}
+
+func KernelVersion() (version string, err error) {
+	uname, err := exec.LookPath("uname")
+	if err != nil {
+		return "", err
+	}
+
+	out, err := invoke.Command(uname, "-r")
+	if err == nil {
+		version = strings.ToLower(strings.TrimSpace(string(out)))
+	}
+
+	return version, nil
 }
 
 func getRedhatishVersion(contents []string) string {
